@@ -345,7 +345,7 @@ class Lookahead(Optimizer):
 
     @staticmethod
     def get_config_space(
-            la_steps=((1, 5), False),
+            la_steps=((5, 10), False),
             la_alpha=((0.5, 0.8), True),
     ):
         cs = CS.ConfigurationSpace()

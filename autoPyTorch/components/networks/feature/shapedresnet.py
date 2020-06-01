@@ -65,11 +65,32 @@ class ShapedResNet(ResNet):
         cs.add_hyperparameter(blocks_per_group_hp)
         add_hyperparameter(cs, CS.CategoricalHyperparameter, "activation", activation)
         use_dropout_hp = add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_dropout", use_dropout)
-        add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_shake_shake", use_shake_shake)
+        shake_shake_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_shake_shake", choices=use_shake_shake, default_value=False))
         add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_batch_normalization", use_batch_normalization)
-        add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_skip_connection", use_skip_connection)
+        skip_connection_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_skip_connection", choices=use_skip_connection, default_value=False))
 
-        shake_drop_hp = add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_shake_drop", use_shake_drop)
+        shake_drop_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_shake_drop", choices=use_shake_drop, default_value=False))
+        
+        ## Forbid a shit load of things :xD
+        if True in use_shake_shake:
+            forbid_shake_shake = CS.ForbiddenEqualsClause(shake_shake_hp, True)
+        if True in use_shake_drop:
+            forbid_shake_drop = CS.ForbiddenEqualsClause(shake_drop_hp, True)
+        if False in use_skip_connection:
+            print(use_skip_connection)
+            when_no_skip_con = CS.ForbiddenEqualsClause(skip_connection_hp, False)
+
+        if True in use_shake_shake and False in use_skip_connection:
+            forbidden_clause2 = CS.ForbiddenAndConjunction(forbid_shake_shake, when_no_skip_con)
+            cs.add_forbidden_clause(forbidden_clause2)
+        
+        if True in use_shake_drop and False in use_skip_connection:
+            forbidden_clause3 = CS.ForbiddenAndConjunction(forbid_shake_drop, when_no_skip_con)
+            cs.add_forbidden_clause(forbidden_clause3)
+
+        if True in use_shake_shake and True in use_shake_drop:
+            forbidden_clause1 = CS.ForbiddenAndConjunction(forbid_shake_shake, forbid_shake_drop)
+            cs.add_forbidden_clause(forbidden_clause1)
 
         validate_if_activated = False
         if isinstance(use_shake_drop, tuple):
