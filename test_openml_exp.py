@@ -237,23 +237,23 @@ print(hyperparameter_search_space)
 # Print all possible configuration options
 autonet.print_help()
 
-# results_fit = autonet.fit(
-#     X_train=X_train,
-#     Y_train=Y_train,
-#     refit=True,
-# )
+results_fit = autonet.fit(
+    X_train=X_train,
+    Y_train=Y_train,
+    refit=True,
+)
 
-# # Save fit results as json
-# with open(os.path.join(result_directory, 'results_fit.json'), "w") as file:
-#     json.dump(results_fit, file)
+# Save fit results as json
+with open(os.path.join(result_directory, 'results_fit.json'), "w") as file:
+    json.dump(results_fit, file)
 
-# # See how the random configuration performs (often it just predicts 0)
-# score = autonet.score(X_test=X_test, Y_test=Y_test)
-# pred = autonet.predict(X=X_test)
+# See how the random configuration performs (often it just predicts 0)
+score = autonet.score(X_test=X_test, Y_test=Y_test)
+pred = autonet.predict(X=X_test)
 
-# print("Model prediction:", pred[0:10])
-# print("Accuracy score", score)
+print("Model prediction:", pred[0:10])
+print("Accuracy score", score)
 
-# # Save fit results as json
-# with open(os.path.join(result_directory, 'test_score.txt'), "w") as file:
-#     json.dump(score, file)
+# Save fit results as json
+with open(os.path.join(result_directory, 'test_score.txt'), "w") as file:
+    json.dump(score, file)
