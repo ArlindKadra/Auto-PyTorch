@@ -288,8 +288,8 @@ class TrainNode(PipelineNode):
             if len(self.ensemble_models) > 0:
                 Y = predict_se(self.ensemble_models, predict_loader)
             else:
-                print('Since snapshot ensembling is used, ensemble models are only stored if refit is called with final config')
-                raise('Cannot predict error!')
+                print('WARNING: snapshot ensembling is used, however, ensemble models contain only one model!')
+                Y = predict(network, predict_loader, device)
         else:
             Y = predict(network, predict_loader, device)
         return {'Y': Y.detach().cpu().numpy()}

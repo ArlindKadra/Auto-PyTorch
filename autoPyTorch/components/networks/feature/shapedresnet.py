@@ -58,26 +58,39 @@ class ShapedResNet(ResNet):
         use_skip_connection=(True, False),
     ):
         cs = CS.ConfigurationSpace()
-        
+        # use_dropout = use_dropout[0]
+        # use_shake_shake = use_shake_shake[0]
+        # use_batch_normalization = use_batch_normalization[0]
+        # use_shake_drop = use_shake_drop[0]
+        # use_skip_connection = use_skip_connection[0]
+
+        print('Printing:')
+        print(use_dropout)
+        print(use_shake_shake)
+        print(use_batch_normalization)
+        print(use_shake_drop)
+        print(use_skip_connection)
+
         num_groups_hp = get_hyperparameter(CS.UniformIntegerHyperparameter, "num_groups", num_groups)
         cs.add_hyperparameter(num_groups_hp)
         blocks_per_group_hp = get_hyperparameter(CS.UniformIntegerHyperparameter, "blocks_per_group", blocks_per_group)
         cs.add_hyperparameter(blocks_per_group_hp)
         add_hyperparameter(cs, CS.CategoricalHyperparameter, "activation", activation)
         use_dropout_hp = add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_dropout", use_dropout)
-        shake_shake_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_shake_shake", choices=use_shake_shake, default_value=False))
+        # shake_shake_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_shake_shake", choices=use_shake_shake, default_value=False))
+        shake_shake_hp = add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_shake_shake", use_shake_shake)
         add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_batch_normalization", use_batch_normalization)
-        skip_connection_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_skip_connection", choices=use_skip_connection, default_value=False))
+        # skip_connection_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_skip_connection", choices=use_skip_connection))
+        skip_connection_hp = add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_skip_connection", use_skip_connection)
+        # shake_drop_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_shake_drop", choices=use_shake_drop, default_value=False))
+        shake_drop_hp = add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_shake_drop", use_shake_drop)
 
-        shake_drop_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_shake_drop", choices=use_shake_drop, default_value=False))
-        
         ## Forbid a shit load of things :xD
         if True in use_shake_shake:
             forbid_shake_shake = CS.ForbiddenEqualsClause(shake_shake_hp, True)
         if True in use_shake_drop:
             forbid_shake_drop = CS.ForbiddenEqualsClause(shake_drop_hp, True)
         if False in use_skip_connection:
-            print(use_skip_connection)
             when_no_skip_con = CS.ForbiddenEqualsClause(skip_connection_hp, False)
 
         if True in use_shake_shake and False in use_skip_connection:
