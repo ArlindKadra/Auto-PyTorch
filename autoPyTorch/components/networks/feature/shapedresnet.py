@@ -58,18 +58,6 @@ class ShapedResNet(ResNet):
         use_skip_connection=(True, False),
     ):
         cs = CS.ConfigurationSpace()
-        # use_dropout = use_dropout[0]
-        # use_shake_shake = use_shake_shake[0]
-        # use_batch_normalization = use_batch_normalization[0]
-        # use_shake_drop = use_shake_drop[0]
-        # use_skip_connection = use_skip_connection[0]
-
-        print('Printing:')
-        print(use_dropout)
-        print(use_shake_shake)
-        print(use_batch_normalization)
-        print(use_shake_drop)
-        print(use_skip_connection)
 
         num_groups_hp = get_hyperparameter(CS.UniformIntegerHyperparameter, "num_groups", num_groups)
         cs.add_hyperparameter(num_groups_hp)
