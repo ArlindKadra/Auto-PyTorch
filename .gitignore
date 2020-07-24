@@ -18,6 +18,8 @@
 #Results
 benchmark_results/
 benchmark_results_cluster/
+logs_moon_cocktail/
+logs_moon_plain/
 ns_credentials*/
 configs.json
 results.json
@@ -45,6 +47,13 @@ test_predictions_for_ensemble.npy
 
 # testing
 tests.ipynb
+CompareCocktailAndPN.ipynb
+MoonDatasetCocktail.ipynb
+MoonDatasetPlain.ipynb
+ReproduceBugWithHyperparameterSearchSpaceUpdates.ipynb
+
+# Settings files
+no_regularization.txt
 
 # venv
 env/
