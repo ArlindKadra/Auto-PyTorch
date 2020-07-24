@@ -76,7 +76,8 @@ class TrainNode(PipelineNode):
             dict -- loss and info reported to bohb
         """
 
-        model_snapshots = []
+
+        model_snapshots = []        
         network_selector_config = ConfigWrapper("NetworkSelector", hyperparameter_config)
         use_swa = network_selector_config["use_swa"]
         use_lookahead = network_selector_config["use_lookahead"]
@@ -96,6 +97,10 @@ class TrainNode(PipelineNode):
         use_se = network_selector_config["use_se"]
 
         if use_se:
+            model_copy = deepcopy(network)
+            model_copy.cpu()
+            model_snapshots.append(model_copy)
+
             # If use_se is true at the same time with use_swa 
             if use_swa:
                 use_swa = False
@@ -104,9 +109,6 @@ class TrainNode(PipelineNode):
                 }
                 network_selector_config.update(update_dict=update_dict)
                 print("SWA and SE can't be used simultaneously, prioritizing SE!")
-
-            if len(model_snapshots) > 0:
-                raise("Either model_snapshots is getting cloned! or fit is called multiple time by bohb worker")
             
             se_lastk = network_selector_config["se_lastk"]
             print('lastk: ', se_lastk)
@@ -301,10 +303,12 @@ class TrainNode(PipelineNode):
         
         if True in pipeline_config["use_se"]:
             if len(self.ensemble_models) > 0:
+                if len(self.ensemble_models) == 1:
+                    print('WARNING: snapshot ensembling is used, but only one model in ensemble, increase budget!')
                 Y = predict_se(self.ensemble_models, predict_loader)
             else:
-                print('WARNING: snapshot ensembling is used, however, ensemble models contain only one model!')
-                Y = predict(network, predict_loader, device)
+                Y = predict(network, predict_loader, device) 
+                print('WARNING: snapshot ensembling is used, however, ensemble models contains no models!')
         else:
             Y = predict(network, predict_loader, device)
         return {'Y': Y.detach().cpu().numpy()}

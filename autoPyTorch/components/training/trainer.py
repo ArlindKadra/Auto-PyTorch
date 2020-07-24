@@ -36,6 +36,7 @@ class Trainer(object):
 
         if self.lookahead:
             self.optimizer = Lookahead(optimizer, config=lookahead_config)
+            self.optimizer.to(device)
         # Stochastic Weight Averaging activated
         if self.swa:
             self.optimizer = SWA(
@@ -238,7 +239,6 @@ class Trainer(object):
     def evaluate_se(self, test_loader, model_snapshots):
         for model in model_snapshots:
             model.eval()
-        
         outputs_data = list()
         targets_data = list()
 
@@ -261,7 +261,6 @@ class Trainer(object):
 
         for model in model_snapshots:
             model.train()
-
         return self.compute_metrics(outputs_data, targets_data)
     
     def compute_metrics(self, outputs_data, targets_data):

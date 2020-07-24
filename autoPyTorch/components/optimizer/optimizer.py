@@ -234,7 +234,7 @@ class RMSpropOptimizer(AutoNetOptimizerBase):
 
 
 class Lookahead(Optimizer):
-    r"""PyTorch implementation of the lookahead wrapper.
+    """PyTorch implementation of the lookahead wrapper.
     Lookahead Optimizer: https://arxiv.org/abs/1907.08610
     """
 
@@ -272,6 +272,18 @@ class Lookahead(Optimizer):
                     param_state['cached_mom'] = torch.zeros_like(p.data)
                     if cuda_available:
                         param_state['cached_mom'] = param_state['cached_mom'].cuda()
+
+    def to(self, device):
+        self.la_alpha.to(device)
+
+        for group in self.optimizer.param_groups:
+            for p in group['params']:
+                param_state = self.state[p]
+                param_state['cached_params'] = param_state['cached_params'].to(device)
+                param_state['cached_params'].copy_(p.data)
+                if self.pullback_momentum == "pullback":
+                    param_state['cached_mom'] = param_state['cached_mom'].to(device)
+      
 
     def __getstate__(self):
         return {
@@ -346,11 +358,7 @@ class Lookahead(Optimizer):
     @staticmethod
     def get_config_space(
             la_steps=((5, 10), False),
-<<<<<<< HEAD
             la_alpha=((0.5, 0.8), False),
-=======
-            la_alpha=((0.5, 0.8), True),
->>>>>>> run_cocktail
     ):
         cs = CS.ConfigurationSpace()
         add_hyperparameter(cs, CS.UniformIntegerHyperparameter, 'la_steps', la_steps)
