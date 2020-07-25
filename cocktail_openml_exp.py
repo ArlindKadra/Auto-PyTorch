@@ -10,7 +10,6 @@ from autoPyTorch import (
 
 import openml
 
-
 def str2bool(v):
     if isinstance(v, bool):
         return v
@@ -183,12 +182,47 @@ search_space_updates.append(
     log=False,
 )
 search_space_updates.append(
+    node_name="NetworkSelector",
+    hyperparameter="shapedresnet:use_shake_shake",
+    value_range=[False, True],
+    log=False,
+)
+search_space_updates.append(
     node_name="CreateDataLoader",
     hyperparameter="batch_size",
     value_range=[128],
     log=False,
 )
-
+search_space_updates.append(
+    node_name="NetworkSelector",
+    hyperparameter="shapedresnet:use_dropout",
+    value_range=[True, False],
+    log=False,
+)
+search_space_updates.append(
+    node_name="NetworkSelector",
+    hyperparameter="shapedresnet:use_shake_shake",
+    value_range=[True, False],
+    log=False,
+)
+search_space_updates.append(
+    node_name="NetworkSelector",
+    hyperparameter="shapedresnet:use_shake_drop",
+    value_range=[True, False],
+    log=False,
+)
+search_space_updates.append(
+    node_name="NetworkSelector",
+    hyperparameter="shapedresnet:use_batch_normalization",
+    value_range=[True, False],
+    log=False,
+)
+search_space_updates.append(
+    node_name="NetworkSelector",
+    hyperparameter="shapedresnet:use_skip_connection",
+    value_range=[True, False],
+    log=False,
+)
 
 result_directory = os.path.join(
     args.working_dir,
@@ -220,8 +254,6 @@ autonet = AutoNetClassification(
     min_workers=args.nr_workers,
     dataset_name=dataset.name,
     working_dir=result_directory,
-    batch_loss_computation_techniques=[args.example_augmentation],
-    use_adversarial_training=[args.use_adversarial_training],
     hyperparameter_search_space_updates=search_space_updates,
     result_logger_dir=result_directory,
 )

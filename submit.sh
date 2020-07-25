@@ -1,0 +1,1 @@
+./experiment_run.sh secondary_dataset_list.txt "/work/ws/nemo/fr_rj50-rj_ws-0/test_cocktail_exp" 

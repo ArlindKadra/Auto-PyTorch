@@ -16,11 +16,13 @@ import openml
 
 def str2bool(v):
     if isinstance(v, bool):
-        return v
+        return (v, )
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
+        return (True, )
     elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
+        return (False, )
+    elif v.lower() in ('2', 'both'):
+        return (True, False)
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
@@ -44,7 +46,7 @@ parser.add_argument(
     type=str2bool,
     nargs='?',
     const=True,
-    default=False,
+    default=(False, ),
 )
 parser.add_argument(
     '--use_se',
@@ -52,7 +54,7 @@ parser.add_argument(
     type=str2bool,
     nargs='?',
     const=True,
-    default=False,
+    default=(False, ),
 )
 parser.add_argument(
     '--use_lookahead',
@@ -60,7 +62,7 @@ parser.add_argument(
     type=str2bool,
     nargs='?',
     const=True,
-    default=False,
+    default=(False, ),
 )
 parser.add_argument(
     '--use_weight_decay',
@@ -68,7 +70,7 @@ parser.add_argument(
     type=str2bool,
     nargs='?',
     const=True,
-    default=False,
+    default=(False, ),
 )
 parser.add_argument(
     '--use_batch_normalization',
@@ -76,7 +78,7 @@ parser.add_argument(
     type=str2bool,
     nargs='?',
     const=True,
-    default=False,
+    default=(False, ),
 )
 parser.add_argument(
     '--use_skip_connection',
@@ -84,7 +86,7 @@ parser.add_argument(
     type=str2bool,
     nargs='?',
     const=True,
-    default=False,
+    default=(False, ),
 )
 parser.add_argument(
     '--use_dropout',
@@ -92,7 +94,7 @@ parser.add_argument(
     type=str2bool,
     nargs='?',
     const=True,
-    default=False,
+    default=(False, ),
 )
 parser.add_argument(
     '--use_shake_drop',
@@ -100,7 +102,7 @@ parser.add_argument(
     type=str2bool,
     nargs='?',
     const=True,
-    default=False,
+    default=(False, ),
 )
 parser.add_argument(
     '--use_shake_shake',
@@ -108,7 +110,7 @@ parser.add_argument(
     type=str2bool,
     nargs='?',
     const=True,
-    default=False,
+    default=(False, ),
 )
 parser.add_argument(
     '--use_adversarial_training',
@@ -116,13 +118,13 @@ parser.add_argument(
     type=str2bool,
     nargs='?',
     const=True,
-    default=False,
+    default=(False, ),
 )
 parser.add_argument(
     '--example_augmentation',
     help='If methods that augment examples should be used',
     type=str,
-    choices=['mixup', 'cutout', 'cutmix', 'standard'],
+    choices=['mixup', 'cutout', 'cutmix', 'standard', 'all'],
     default='standard',
 )
 parser.add_argument(
@@ -165,6 +167,13 @@ parser.add_argument(
 args = parser.parse_args()
 search_space_updates = HyperparameterSearchSpaceUpdates()
 
+if args.example_augmentation == 'all':
+    args.example_augmentation = ['mixup', 'cutout', 'cutmix', 'standard']
+else:
+    args.example_augmentation = [args.example_augmentation]
+
+
+
 # Fixed architecture space
 search_space_updates.append(
     node_name="NetworkSelector",
@@ -200,44 +209,44 @@ search_space_updates.append(
 search_space_updates.append(
     node_name="NetworkSelector",
     hyperparameter="shapedresnet:use_dropout",
-    value_range=[args.use_dropout],
+    value_range=[*args.use_dropout],
     log=False,
 )
 search_space_updates.append(
     node_name="NetworkSelector",
     hyperparameter="shapedresnet:use_shake_shake",
-    value_range=[args.use_shake_shake],
+    value_range=[*args.use_shake_shake],
     log=False,
 )
 search_space_updates.append(
     node_name="NetworkSelector",
     hyperparameter="shapedresnet:use_shake_drop",
-    value_range=[args.use_shake_drop],
+    value_range=[*args.use_shake_drop],
     log=False,
 )
 search_space_updates.append(
     node_name="NetworkSelector",
     hyperparameter="shapedresnet:use_batch_normalization",
-    value_range=[args.use_batch_normalization],
+    value_range=[*args.use_batch_normalization],
     log=False,
 )
 search_space_updates.append(
     node_name="NetworkSelector",
     hyperparameter="shapedresnet:use_skip_connection",
-    value_range=[args.use_skip_connection],
+    value_range=[*args.use_skip_connection],
     log=False,
 )
 
 search_space_updates.append(
     node_name="OptimizerSelector",
     hyperparameter="sgd:use_weight_decay",
-    value_range=[args.use_weight_decay],
+    value_range=[*args.use_weight_decay],
     log=False,
 )
 search_space_updates.append(
     node_name="OptimizerSelector",
     hyperparameter="adamw:use_weight_decay",
-    value_range=[args.use_weight_decay],
+    value_range=[*args.use_weight_decay],
     log=False,
 )
 
@@ -271,11 +280,11 @@ autonet = AutoNetClassification(
     min_workers=args.nr_workers,
     dataset_name=dataset.name,
     working_dir=result_directory,
-    batch_loss_computation_techniques=[args.example_augmentation],
-    use_lookahead=[args.use_lookahead],
-    use_swa=[args.use_swa],
-    use_se=[args.use_se],
-    use_adversarial_training=[args.use_adversarial_training],
+    batch_loss_computation_techniques=[*args.example_augmentation],
+    use_lookahead=[*args.use_lookahead],
+    use_swa=[*args.use_swa],
+    use_se=[*args.use_se],
+    use_adversarial_training=[*args.use_adversarial_training],
     hyperparameter_search_space_updates=search_space_updates,
     result_logger_dir=result_directory,
     torch_num_threads=args.num_threads,
