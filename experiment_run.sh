@@ -13,6 +13,6 @@ NUMBERS=$(<$file)
 for NUM in $NUMBERS
 do
    export task=$(echo $NUM)     
-   msub -V -t 1-16 investigating_dl.moab
+   msub -V -t 1-10 investigating_dl.moab
 done
 

@@ -17,4 +17,4 @@ python /home/fr/fr_fr/fr_rj50/Auto-PyTorch/openml_experiment.py \
 --use_batch_normalization 2 --use_skip_connection 2 \
 --use_dropout 2 --use_shake_drop 2 --use_shake_shake 2 \
 --use_adversarial_training 2 --example_augmentation all \
---num_threads 2
+--num_threads 2 --use_swa 2
