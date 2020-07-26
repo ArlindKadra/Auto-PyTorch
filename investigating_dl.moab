@@ -10,7 +10,7 @@ cd "$dir"
 source /home/fr/fr_fr/fr_rj50/anaconda3/etc/profile.d/conda.sh
 conda activate autopytorch
 # For cocktail, we need specific configuration
-python /home/fr/fr_fr/fr_rj50/Auto-PyTorch/cocktail_openml_exp.py \
+python /home/fr/fr_fr/fr_rj50/Auto-PyTorch/openml_experiment.py \
 --array_id $MOAB_JOBARRAYINDEX --run_id $MOAB_JOBID --working_dir "$dir" \
 --task_id $task --nr_workers 10 --nr_units 512 \
 --use_se 2 --use_lookahead 2 --use_weight_decay 2 \

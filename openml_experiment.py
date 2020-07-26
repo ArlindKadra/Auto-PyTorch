@@ -236,13 +236,6 @@ search_space_updates.append(
     value_range=[*args.use_skip_connection],
     log=False,
 )
-
-search_space_updates.append(
-    node_name="OptimizerSelector",
-    hyperparameter="sgd:use_weight_decay",
-    value_range=[*args.use_weight_decay],
-    log=False,
-)
 search_space_updates.append(
     node_name="OptimizerSelector",
     hyperparameter="adamw:use_weight_decay",
@@ -272,7 +265,7 @@ X_test, Y_test = X[ind_test], y[ind_test]
 run_id = re.sub(r"\D+\d+(\d|\])*$", "", args.run_id)
 
 autonet = AutoNetClassification(
-   'no_regularization',
+   '/home/fr/fr_fr/fr_rj50/Auto-PyTorch/no_regularization',
     random_seed=args.random_seed,
     run_id=run_id,
     task_id=args.array_id,
