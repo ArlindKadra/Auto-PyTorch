@@ -52,12 +52,39 @@ class ShapedResNet(ResNet):
         resnet_shape=('funnel', 'long_funnel', 'diamond', 'hexagon', 'brick', 'triangle', 'stairs'),
         dropout_shape=('funnel', 'long_funnel', 'diamond', 'hexagon', 'brick', 'triangle', 'stairs'),
         use_dropout=(True, False),
-        use_shake_shake=(True, False),
+        use_shake_shake=[True, False],
         use_batch_normalization=(True, False),
-        use_shake_drop=(True, False),
-        use_skip_connection=(True, False),
+        use_shake_drop=[True, False],
+        use_skip_connection=[True, False],
     ):
         cs = CS.ConfigurationSpace()
+
+        if isinstance(use_skip_connection[0], list):
+            use_skip_connection = use_skip_connection[0]
+        if isinstance(use_shake_shake[0], list):
+            use_shake_shake = use_shake_shake[0]
+        if isinstance(use_shake_drop[0], list):
+            use_shake_drop = use_shake_drop[0]
+
+
+        default_skip_connection = True
+        if True not in use_skip_connection:
+            default_skip_connection = False
+        default_shake_shake = True
+        if False in use_shake_shake:
+            default_shake_shake = False
+        default_shake_drop = True
+        if False in use_shake_drop:
+            default_shake_drop = False        
+
+        print(use_skip_connection)
+        print(use_shake_shake)
+        print(use_shake_drop)
+
+        if (True in use_shake_shake and False not in use_shake_drop) or (True in use_shake_drop and False not in use_shake_shake):
+            print('Invalid config!')
+            raise NameError('Shake-Shake and Shake-Drop can not be True at the same time! Check the config if one is Allowed then the other should be either False or allowed too!')
+
 
         num_groups_hp = get_hyperparameter(CS.UniformIntegerHyperparameter, "num_groups", num_groups)
         cs.add_hyperparameter(num_groups_hp)
@@ -65,13 +92,14 @@ class ShapedResNet(ResNet):
         cs.add_hyperparameter(blocks_per_group_hp)
         add_hyperparameter(cs, CS.CategoricalHyperparameter, "activation", activation)
         use_dropout_hp = add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_dropout", use_dropout)
-        # shake_shake_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_shake_shake", choices=use_shake_shake, default_value=False))
-        shake_shake_hp = add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_shake_shake", use_shake_shake)
+        shake_shake_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_shake_shake", choices=use_shake_shake, default_value=default_shake_shake))
+        # shake_shake_hp = add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_shake_shake", use_shake_shake)
         add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_batch_normalization", use_batch_normalization)
-        # skip_connection_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_skip_connection", choices=use_skip_connection))
-        skip_connection_hp = add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_skip_connection", use_skip_connection)
-        # shake_drop_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_shake_drop", choices=use_shake_drop, default_value=False))
-        shake_drop_hp = add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_shake_drop", use_shake_drop)
+        skip_connection_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_skip_connection", choices=use_skip_connection, default_value=default_skip_connection))
+        # skip_connection_hp = add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_skip_connection", use_skip_connection)
+        shake_drop_hp = cs.add_hyperparameter(CSH.CategoricalHyperparameter(name="use_shake_drop", choices=use_shake_drop, default_value=default_shake_drop))
+        # shake_drop_hp = add_hyperparameter(cs, CS.CategoricalHyperparameter, "use_shake_drop", use_shake_drop)
+
 
         ## Forbid a shit load of things :xD
         if True in use_shake_shake:
@@ -93,27 +121,14 @@ class ShapedResNet(ResNet):
             forbidden_clause1 = CS.ForbiddenAndConjunction(forbid_shake_shake, forbid_shake_drop)
             cs.add_forbidden_clause(forbidden_clause1)
 
-        validate_if_activated = False
-        if isinstance(use_shake_drop, tuple):
-            if isinstance(use_shake_drop[0], list):
-                value_to_check = use_shake_drop[0]
-
-            else:
-                value_to_check = use_shake_drop
-                validate_if_activated = True
-        else:
-            if isinstance(use_shake_drop, bool):
-                value_to_check = use_shake_drop
-
-        if True in value_to_check:
+        if True in use_shake_drop:
             shake_drop_prob_hp = add_hyperparameter(
                 cs,
                 CS.UniformFloatHyperparameter,
                 "max_shake_drop_probability",
                 max_shake_drop_probability,
             )
-            if validate_if_activated:
-                cs.add_condition(CS.EqualsCondition(shake_drop_prob_hp, shake_drop_hp, True))
+            cs.add_condition(CS.EqualsCondition(shake_drop_prob_hp, shake_drop_hp, True))
         
         add_hyperparameter(cs, CSH.CategoricalHyperparameter, 'resnet_shape', resnet_shape)
         add_hyperparameter(cs, CSH.UniformIntegerHyperparameter, "max_units", max_units)
